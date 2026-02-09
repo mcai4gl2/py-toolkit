@@ -2,7 +2,7 @@
   "name": "py-toolkit",
   "displayName": "py-toolkit",
   "description": "Python monorepo toolkit: venv management, project discovery, and developer tools",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "publisher": "mcai4gl2",
   "license": "MIT",
   "repository": {
