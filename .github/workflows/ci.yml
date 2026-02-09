@@ -30,5 +30,8 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Test
+        run: npm run test:unit:coverage
+
       - name: Package
         run: npx vsce package --no-dependencies

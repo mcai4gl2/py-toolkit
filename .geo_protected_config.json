@@ -1,0 +1,10 @@
+{
+  "countries": [
+    "SG"
+  ],
+  "command": [
+    "claude"
+  ],
+  "poll_interval": 15,
+  "country": "SG"
+}

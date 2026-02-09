@@ -1,0 +1,14 @@
+{
+  "all": true,
+  "src": ["out"],
+  "include": [
+    "out/discovery/**",
+    "out/venv/**",
+    "out/config.js"
+  ],
+  "exclude": [
+    "out/test/**",
+    "out/venv/manager.js"
+  ],
+  "reporter": ["text", "text-summary"]
+}
