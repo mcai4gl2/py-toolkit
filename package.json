@@ -1,0 +1,356 @@
+{
+  "name": "py-toolkit",
+  "displayName": "py-toolkit",
+  "description": "Python monorepo toolkit: venv management, project discovery, and developer tools",
+  "version": "0.3.0",
+  "publisher": "ligeng",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ligeng/py-toolkit"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Other"
+  ],
+  "activationEvents": [
+    "workspaceContains:**/requirements.txt",
+    "workspaceContains:**/pyproject.toml",
+    "workspaceContains:**/*.py"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "pyToolkit.createVenv",
+        "title": "py-toolkit: Create/Update Virtual Environment"
+      },
+      {
+        "command": "pyToolkit.discoverProjects",
+        "title": "py-toolkit: Discover Sub-projects"
+      },
+      {
+        "command": "pyToolkit.runTests",
+        "title": "py-toolkit: Run Tests"
+      },
+      {
+        "command": "pyToolkit.lintFile",
+        "title": "py-toolkit: Lint File"
+      },
+      {
+        "command": "pyToolkit.profileFile",
+        "title": "py-toolkit: Profile File"
+      },
+      {
+        "command": "pyToolkit.debugFile",
+        "title": "py-toolkit: Debug File (Crash Capture)"
+      },
+      {
+        "command": "pyToolkit.validateWorkspace",
+        "title": "py-toolkit: Validate Workspace"
+      },
+      {
+        "command": "pyToolkit.showActions",
+        "title": "py-toolkit: Show Actions"
+      },
+      {
+        "command": "pyToolkit.refreshTree",
+        "title": "py-toolkit: Refresh Projects",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "pyToolkit.createVenvForProject",
+        "title": "Create/Update Venv",
+        "icon": "$(add)"
+      },
+      {
+        "command": "pyToolkit.deleteVenv",
+        "title": "Delete Venv",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "pyToolkit.openTerminalInVenv",
+        "title": "Open Terminal in Venv",
+        "icon": "$(terminal)"
+      },
+      {
+        "command": "pyToolkit.installPackage",
+        "title": "Install Package",
+        "icon": "$(package)"
+      }
+    ],
+    "taskDefinitions": [
+      {
+        "type": "py-toolkit",
+        "required": [
+          "task"
+        ],
+        "properties": {
+          "task": {
+            "type": "string",
+            "description": "The task label"
+          }
+        }
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "pyToolkit",
+          "title": "py-toolkit",
+          "icon": "$(python)"
+        }
+      ]
+    },
+    "views": {
+      "pyToolkit": [
+        {
+          "id": "pyToolkit.projectsView",
+          "name": "Projects"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "pyToolkit.refreshTree",
+          "when": "view == pyToolkit.projectsView",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "pyToolkit.createVenvForProject",
+          "when": "view == pyToolkit.projectsView && viewItem =~ /^pyToolkit\\.project\\./",
+          "group": "1_venv@1"
+        },
+        {
+          "command": "pyToolkit.deleteVenv",
+          "when": "view == pyToolkit.projectsView && viewItem =~ /^pyToolkit\\.project\\.(ok|stale)$/",
+          "group": "1_venv@2"
+        },
+        {
+          "command": "pyToolkit.openTerminalInVenv",
+          "when": "view == pyToolkit.projectsView && viewItem =~ /^pyToolkit\\.project\\.(ok|stale)$/",
+          "group": "2_tools@1"
+        },
+        {
+          "command": "pyToolkit.installPackage",
+          "when": "view == pyToolkit.projectsView && viewItem =~ /^pyToolkit\\.project\\.(ok|stale)$/",
+          "group": "2_tools@2"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "py-toolkit",
+      "properties": {
+        "pyToolkit.python.minVersion": {
+          "type": "string",
+          "default": "3.10",
+          "description": "Minimum required Python version"
+        },
+        "pyToolkit.python.preferredManagers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "uv",
+              "venv+pip"
+            ]
+          },
+          "default": [
+            "uv",
+            "venv+pip"
+          ],
+          "description": "Package manager preference order (auto-detected per project if not set)"
+        },
+        "pyToolkit.python.pypiMirror": {
+          "type": "string",
+          "default": "auto",
+          "description": "PyPI mirror URL, or 'auto' to detect via geo-IP"
+        },
+        "pyToolkit.projects.excludePatterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "*.venv",
+            "__pycache__",
+            ".pytest_cache",
+            ".mypy_cache",
+            ".ruff_cache",
+            "node_modules"
+          ],
+          "description": "Glob patterns to exclude from sub-project discovery"
+        },
+        "pyToolkit.tools.test.framework": {
+          "type": "string",
+          "default": "pytest",
+          "description": "Test framework to use"
+        },
+        "pyToolkit.tools.test.defaultArgs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "-v",
+            "--tb=short"
+          ],
+          "description": "Default arguments passed to pytest"
+        },
+        "pyToolkit.tools.test.coverageArgs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "--cov",
+            "--cov-report=html"
+          ],
+          "description": "Additional pytest arguments for coverage runs"
+        },
+        "pyToolkit.tools.lint.ruff.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable ruff linter"
+        },
+        "pyToolkit.tools.lint.ruff.args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "check",
+            "--select=E,F,W,I"
+          ],
+          "description": "Arguments passed to ruff"
+        },
+        "pyToolkit.tools.lint.mypy.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable mypy type checker"
+        },
+        "pyToolkit.tools.lint.mypy.args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "--strict",
+            "--ignore-missing-imports"
+          ],
+          "description": "Arguments passed to mypy"
+        },
+        "pyToolkit.tools.lint.black.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable black formatter check"
+        },
+        "pyToolkit.tools.lint.black.args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "--check",
+            "--line-length=100"
+          ],
+          "description": "Arguments passed to black"
+        },
+        "pyToolkit.tools.profile.defaultTool": {
+          "type": "string",
+          "default": "cProfile",
+          "description": "Default profiling tool"
+        },
+        "pyToolkit.tools.debug.debugger": {
+          "type": "string",
+          "default": "ipdb",
+          "description": "Preferred debugger (ipdb or pdb)"
+        },
+        "pyToolkit.tools.debug.fallback": {
+          "type": "string",
+          "default": "pdb",
+          "description": "Fallback debugger if preferred is unavailable"
+        },
+        "pyToolkit.output.baseDir": {
+          "type": "string",
+          "default": "out",
+          "description": "Base directory for tool outputs"
+        },
+        "pyToolkit.output.profileDir": {
+          "type": "string",
+          "default": "out/profiles",
+          "description": "Directory for profiling output"
+        },
+        "pyToolkit.output.testReports": {
+          "type": "string",
+          "default": "out/test-reports",
+          "description": "Directory for test reports"
+        },
+        "pyToolkit.output.coverageDir": {
+          "type": "string",
+          "default": "out/coverage",
+          "description": "Directory for coverage reports"
+        },
+        "pyToolkit.taskVariants": {
+          "type": "object",
+          "default": {},
+          "description": "Per-file task variants with extra arguments. Keys are relative file paths, values are arrays of {name, args, description}.",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "args": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "description": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "args"
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "lint:fix": "eslint src --ext ts --fix",
+    "test": "tsc -p ./ && node ./out/test/runTests.js",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@vscode/test-electron": "^2.3.0",
+    "@vscode/vsce": "^3.0.0",
+    "eslint": "^8.56.0",
+    "glob": "^13.0.1",
+    "mocha": "^11.7.5",
+    "typescript": "^5.3.0"
+  }
+}
