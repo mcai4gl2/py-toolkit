@@ -2,7 +2,7 @@
   "name": "py-toolkit",
   "displayName": "py-toolkit",
   "description": "Python monorepo toolkit: venv management, project discovery, and developer tools",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "publisher": "ligeng",
   "license": "MIT",
   "repository": {
